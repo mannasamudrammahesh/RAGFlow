@@ -1,7 +1,19 @@
-﻿from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+﻿import os
+import tempfile
+import sys
+
+os.environ['TMPDIR'] = '/tmp'
+tempfile.tempdir = '/tmp'
+try:
+    os.makedirs('/tmp', exist_ok=True)
+    os.makedirs('/tmp/uploads', exist_ok=True)
+    os.makedirs('/tmp/chroma_data', exist_ok=True)
+except Exception:
+    pass
+
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os
 import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -41,12 +53,11 @@ rag_pipeline = RAGPipeline(
 )
 
 # Upload directory (use /tmp for serverless platforms like Vercel)
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/tmp/uploads" if os.getenv("VERCEL") else "./uploads")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/tmp/uploads")
 try:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 except Exception:
-    UPLOAD_DIR = "/tmp/uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    pass
 
 # Supabase client setup
 supabase_client = None
