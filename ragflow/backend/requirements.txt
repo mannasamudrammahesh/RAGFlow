@@ -1,0 +1,17 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+pydantic==2.5.0
+langchain==0.1.0
+langchain-community==0.0.10
+sentence-transformers==2.7.0
+huggingface-hub>=0.21.0
+chromadb==0.4.21
+openai>=1.0.0,<2.0.0
+httpx>=0.24.0
+python-dotenv==1.0.0
+PyPDF2==3.0.1
+python-docx==0.8.11
+PyJWT>=2.8.0
+cryptography>=41.0.0
+supabase>=2.0.0
