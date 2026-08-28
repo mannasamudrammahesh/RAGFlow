@@ -2,7 +2,8 @@ import chromadb
 import os
 from typing import List, Dict, Any, Optional
 
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_data")
+default_db_path = "/tmp/chroma_data" if os.getenv("VERCEL") else "./chroma_data"
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", default_db_path)
 
 
 class VectorStore:
@@ -15,11 +16,14 @@ class VectorStore:
     def __init__(self, db_path: str = CHROMA_DB_PATH):
         self.db_path = db_path
         os.makedirs(db_path, exist_ok=True)
-        self.client = chromadb.PersistentClient(path=db_path)
+        try:
+            self.client = chromadb.PersistentClient(path=db_path)
+        except Exception:
+            # Fallback for serverless environments with read-only file systems
+            self.client = chromadb.EphemeralClient()
 
     def _get_collection(self, user_id: str):
         """Get or create the ChromaDB collection for a specific user."""
-        # Sanitize user_id for use as collection name (UUIDs are safe but replace hyphens)
         safe_id = user_id.replace("-", "_")
         collection_name = f"user_{safe_id}"
         return self.client.get_or_create_collection(
@@ -55,7 +59,6 @@ class VectorStore:
         """Search within the user's collection only."""
         collection = self._get_collection(user_id)
 
-        # Guard against requesting more results than docs exist
         count = collection.count()
         if count == 0:
             return {"documents": [[]], "metadatas": [[]], "distances": [[]]}
@@ -66,14 +69,14 @@ class VectorStore:
             "n_results": n_results,
         }
         if doc_id:
-            query_params["where"] = {"doc_id": {"$eq": doc_id}}
+            query_params["where"] = {"doc_id": {"": doc_id}}
 
         return collection.query(**query_params)
 
     def delete_document(self, doc_id: str, user_id: str) -> None:
         """Delete all chunks of a document from the user's collection."""
         collection = self._get_collection(user_id)
-        results = collection.get(where={"doc_id": {"$eq": doc_id}})
+        results = collection.get(where={"doc_id": {"": doc_id}})
         if results["ids"]:
             collection.delete(ids=results["ids"])
 

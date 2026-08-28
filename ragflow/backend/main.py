@@ -14,12 +14,13 @@ load_dotenv(override=True)
 
 app = FastAPI(title="RagFlow API", version="2.0.0")
 
-# CORS middleware — allow localhost, any Vercel domain, and configured FRONTEND_URL
+# CORS middleware
 def _get_allowed_origins() -> list:
     origins = [
         "http://localhost:3000",
         "http://localhost:3001",
         "https://localhost:3000",
+        "*"
     ]
     frontend_url = os.getenv("FRONTEND_URL", "")
     if frontend_url and frontend_url not in origins:
@@ -28,8 +29,7 @@ def _get_allowed_origins() -> list:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_get_allowed_origins(),
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,13 +40,16 @@ rag_pipeline = RAGPipeline(
     use_local_llm=os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
 )
 
-# Upload directory
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Upload directory (use /tmp for serverless platforms like Vercel)
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/tmp/uploads" if os.getenv("VERCEL") else "./uploads")
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except Exception:
+    UPLOAD_DIR = "/tmp/uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # ---------------------------------------------------------------------------
-# Supabase client setup (optional — used for persistent document registry)
-# Falls back gracefully to in-memory if SUPABASE keys are not yet configured.
+# Supabase client setup (optional)
 # ---------------------------------------------------------------------------
 supabase_client = None
 try:
@@ -55,19 +58,13 @@ try:
     if supabase_url and supabase_service_key:
         from supabase import create_client
         supabase_client = create_client(supabase_url, supabase_service_key)
-        print("[OK] Supabase client initialized — using persistent DB")
+        print("[OK] Supabase client initialized")
     else:
-        print("[WARN] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — falling back to in-memory registry")
+        print("[WARN] SUPABASE keys not set � falling back to in-memory registry")
 except Exception as e:
-    print(f"[WARN] Supabase client init failed: {e} — falling back to in-memory registry")
+    print(f"[WARN] Supabase client init failed: {e}")
 
-# In-memory fallback (used when Supabase is not configured)
 _memory_registry: Dict[str, Dict[str, Any]] = {}
-
-
-# ---------------------------------------------------------------------------
-# DB helpers — abstract over Supabase vs in-memory
-# ---------------------------------------------------------------------------
 
 def _db_add_document(user_id: str, doc_id: str, filename: str, file_path: str,
                      chunks_count: int, processing_time: float) -> None:
@@ -84,7 +81,6 @@ def _db_add_document(user_id: str, doc_id: str, filename: str, file_path: str,
             return
         except Exception as e:
             print(f"[WARN] Supabase insert failed ({e}), falling back to in-memory")
-    # In-memory fallback
     _memory_registry[doc_id] = {
         "user_id": user_id,
         "filename": filename,
@@ -92,7 +88,6 @@ def _db_add_document(user_id: str, doc_id: str, filename: str, file_path: str,
         "chunks_count": chunks_count,
         "upload_time": str(processing_time),
     }
-
 
 def _db_list_documents(user_id: str) -> List[Dict[str, Any]]:
     if supabase_client:
@@ -109,7 +104,6 @@ def _db_list_documents(user_id: str) -> List[Dict[str, Any]]:
             ]
         except Exception as e:
             print(f"[WARN] Supabase list failed ({e}), falling back to in-memory")
-    # In-memory fallback
     return [
         {
             "id": doc_id,
@@ -121,7 +115,6 @@ def _db_list_documents(user_id: str) -> List[Dict[str, Any]]:
         if info.get("user_id") == user_id
     ]
 
-
 def _db_get_document(user_id: str, doc_id: str) -> Optional[Dict[str, Any]]:
     if supabase_client:
         try:
@@ -130,12 +123,10 @@ def _db_get_document(user_id: str, doc_id: str) -> Optional[Dict[str, Any]]:
                 return res.data[0]
         except Exception as e:
             print(f"[WARN] Supabase get failed ({e}), falling back to in-memory")
-    # In-memory fallback
     doc = _memory_registry.get(doc_id)
     if doc and doc.get("user_id") == user_id:
         return doc
     return None
-
 
 def _db_delete_document(user_id: str, doc_id: str) -> None:
     if supabase_client:
@@ -145,20 +136,11 @@ def _db_delete_document(user_id: str, doc_id: str) -> None:
             print(f"[WARN] Supabase delete failed ({e}), falling back to in-memory")
     _memory_registry.pop(doc_id, None)
 
-
-# ---------------------------------------------------------------------------
-# Pydantic models
-# ---------------------------------------------------------------------------
-
 class QueryRequest(BaseModel):
     question: str
     top_k: int = 5
 
-
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
+@app.get("/")
 @app.get("/health")
 async def health_check():
     return {
@@ -167,25 +149,20 @@ async def health_check():
         "version": "2.0.0",
     }
 
-
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
     user_id: str = Depends(get_current_user),
 ):
-    """Upload and process a document for the authenticated user."""
     try:
         doc_id = str(uuid.uuid4())
         file_path = os.path.join(UPLOAD_DIR, f"{user_id}_{doc_id}_{file.filename}")
 
-        # Save file
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # Process document through RAG pipeline (into user's isolated collection)
         result = rag_pipeline.ingest_document(file_path, doc_id, file.filename, user_id=user_id)
 
-        # Persist document record
         _db_add_document(
             user_id=user_id,
             doc_id=doc_id,
@@ -205,13 +182,11 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @app.post("/query")
 async def query_documents(
     request: QueryRequest,
     user_id: str = Depends(get_current_user),
 ):
-    """Query documents using RAG — scoped to the authenticated user's collection."""
     try:
         result = rag_pipeline.query(
             request.question,
@@ -234,34 +209,30 @@ async def query_documents(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @app.get("/documents")
 async def list_documents(user_id: str = Depends(get_current_user)):
-    """List all documents uploaded by the authenticated user."""
     docs = _db_list_documents(user_id)
     return {"documents": docs}
-
 
 @app.delete("/documents/{doc_id}")
 async def delete_document(
     doc_id: str,
     user_id: str = Depends(get_current_user),
 ):
-    """Delete a document — only if it belongs to the authenticated user."""
     try:
         doc = _db_get_document(user_id, doc_id)
         if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
-        # Delete from vector store
         rag_pipeline.delete_document(doc_id, user_id=user_id)
 
-        # Delete physical file
         file_path = doc.get("file_path")
         if file_path and os.path.exists(file_path):
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+            except Exception:
+                pass
 
-        # Delete from DB / registry
         _db_delete_document(user_id, doc_id)
 
         return {"success": True, "message": "Document deleted"}
@@ -269,7 +240,6 @@ async def delete_document(
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 if __name__ == "__main__":
     import uvicorn
