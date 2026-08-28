@@ -26,23 +26,11 @@ load_dotenv(override=True)
 
 app = FastAPI(title="RagFlow API", version="2.0.0")
 
-# CORS middleware
-def _get_allowed_origins() -> list:
-    origins = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://localhost:3000",
-        "*"
-    ]
-    frontend_url = os.getenv("FRONTEND_URL", "")
-    if frontend_url and frontend_url not in origins:
-        origins.append(frontend_url)
-    return origins
-
+# CORS middleware - allow all origins without credentials conflict
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
