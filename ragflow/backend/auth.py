@@ -1,7 +1,7 @@
 """
 JWT authentication middleware for FastAPI.
 
-Your Supabase project uses ECC (P-256) asymmetric JWT signing — there is no
+Your Supabase project uses ECC (P-256) asymmetric JWT signing - there is no
 shared HS256 secret string. The correct and most reliable approach is to call
 Supabase Auth's get_user() which verifies the token server-side and returns
 the authenticated user.
@@ -59,7 +59,7 @@ def get_current_user(
     client = _get_supabase_client()
 
     if client is None:
-        # Supabase not configured — dev fallback: decode without verification
+        # Supabase not configured - dev fallback: decode without verification
         # DO NOT use in production
         try:
             import jwt as pyjwt
@@ -67,7 +67,7 @@ def get_current_user(
             user_id = payload.get("sub")
             if not user_id:
                 raise HTTPException(status_code=401, detail="Invalid token: missing user ID")
-            print("[WARN] Running without Supabase verification — dev mode only")
+            print("[WARN] Running without Supabase verification - dev mode only")
             return user_id
         except Exception as e:
             raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
@@ -95,7 +95,7 @@ def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> Optional[str]:
     """
-    Optional auth — returns user_id or None.
+    Optional auth - returns user_id or None.
     Use on public routes that optionally show personalized content.
     """
     if credentials is None:

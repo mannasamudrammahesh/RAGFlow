@@ -47,12 +47,12 @@ class LLMProvider:
 
 Your job is to answer the user's question in two possible modes:
 
-MODE 1 — DOCUMENT ANSWER (preferred):
+MODE 1 - DOCUMENT ANSWER (preferred):
 - If the provided context contains enough information to answer the question, answer using ONLY that context.
 - Start your response with the exact tag: [SOURCE:DOCUMENT]
 - Then provide a clear, concise answer grounded in the context.
 
-MODE 2 — EXTERNAL KNOWLEDGE:
+MODE 2 - EXTERNAL KNOWLEDGE:
 - If the context does NOT contain relevant information to answer the user's question:
   1. Start your response with the exact tag: [SOURCE:EXTERNAL]
   2. On the first line after the tag, write: "⚠️ **This information is not available in your uploaded documents.**\n\nHere is the answer based on general knowledge:\n"
@@ -104,7 +104,7 @@ Answer (remember to start with [SOURCE:DOCUMENT] or [SOURCE:EXTERNAL]):"""
                 answer = raw[len("[SOURCE:DOCUMENT]"):].strip()
                 source = "document"
             else:
-                # Fallback — treat as document answer if tag missing
+                # Fallback - treat as document answer if tag missing
                 answer = raw
                 source = "document"
 
