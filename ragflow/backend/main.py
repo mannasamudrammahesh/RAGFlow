@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+ï»¿from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize RAG pipeline (shared, but uses per-user collections)
+# Initialize RAG pipeline
 rag_pipeline = RAGPipeline(
     use_local_llm=os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
 )
@@ -48,9 +48,7 @@ except Exception:
     UPLOAD_DIR = "/tmp/uploads"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ---------------------------------------------------------------------------
-# Supabase client setup (optional)
-# ---------------------------------------------------------------------------
+# Supabase client setup
 supabase_client = None
 try:
     supabase_url = os.getenv("SUPABASE_URL")
@@ -60,7 +58,7 @@ try:
         supabase_client = create_client(supabase_url, supabase_service_key)
         print("[OK] Supabase client initialized")
     else:
-        print("[WARN] SUPABASE keys not set — falling back to in-memory registry")
+        print("[WARN] SUPABASE keys not set - falling back to in-memory registry")
 except Exception as e:
     print(f"[WARN] Supabase client init failed: {e}")
 
