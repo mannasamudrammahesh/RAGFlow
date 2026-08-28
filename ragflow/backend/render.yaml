@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: ragflow-backend
+    runtime: python
+    rootDir: ragfloe/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: MODEL_NAME
+        value: qwen/qwen3.8-27b
+      - key: USE_LOCAL_LLM
+        value: "false"
+      - key: CHROMA_DB_PATH
+        value: /data/chroma_data
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      # Set these as secret environment variables in Render dashboard:
+      # OPENAI_API_KEY        = your Groq API key
+      # SUPABASE_URL          = your Supabase project URL
+      # SUPABASE_SERVICE_ROLE_KEY = your Supabase service role key
+      # FRONTEND_URL          = https://your-app.vercel.app
+    disk:
+      name: ragflow-data
+      mountPath: /data
+      sizeGB: 1
+    plan: free
+    healthCheckPath: /health

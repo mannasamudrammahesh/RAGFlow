@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.production
+
+# Data & uploads (too large for git)
+chroma_data/
+uploads/
+cache/
+test_chroma/
+
+# Logs & debug
+*.log
+*.txt
+server_log.txt
+clean_log.txt
+out2.txt
+query_result.txt
+test_out.txt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

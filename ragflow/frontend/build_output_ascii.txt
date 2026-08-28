@@ -1,0 +1,185 @@
+
+> frontend@0.1.0 build
+> next build
+
+node.exe : ??? 
+Warning: Next.js 
+inferred your 
+workspace root, but it 
+may not be correct.
+At C:\Program Files\nod
+ejs\npm.ps1:29 char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (??? Warning:    
+ Ne...not be correc    
+t.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+ We detected multiple 
+lockfiles and selected 
+the directory of C:\Use
+rs\mahi\Downloads\pnpm-
+lock.yaml as the root 
+directory.
+ To silence this 
+warning, set 
+`turbopack.root` in 
+your Next.js config, 
+or consider removing 
+one of the lockfiles 
+if it's not needed.
+   See https://nextjs.o
+rg/docs/app/api-referen
+ce/config/next-config-j
+s/turbopack#root-direct
+ory for more 
+information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\mahi\Down
+loads\ragfloe-intellige
+nce-main\ragfloe\fronte
+nd\package-lock.json
+
+??? Next.js 16.1.6 (Turbopack)
+
+  Running TypeScript ...
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./ragfloe-intelligence-
+main/ragfloe/frontend/s
+tyles/globals.css
+Error evaluating 
+Node.js code
+CssSyntaxError: C:\User
+s\mahi\Downloads\ragflo
+e-intelligence-main\rag
+floe\frontend\styles\gl
+obals.css:3:1: The 
+`bg-background` class 
+does not exist. If 
+`bg-background` is a 
+custom class, make 
+sure it is defined 
+within a `@layer` 
+directive.
+    at Input.error (rag
+floe-intelligence-main/
+ragfloe/frontend/node_m
+odules/postcss/lib/inpu
+t.js:135:16) [C:\Users\
+mahi\Downloads\ragfloe-
+intelligence-main\ragfl
+oe\frontend\.next\build
+\chunks\ed651_0d4a398b.
+_.js:4651:22]
+    at AtRule.error (ra
+gfloe-intelligence-main
+/ragfloe/frontend/node_
+modules/postcss/lib/nod
+e.js:146:32) [C:\Users\
+mahi\Downloads\ragfloe-
+intelligence-main\ragfl
+oe\frontend\.next\build
+\chunks\ed651_0d4a398b.
+_.js:928:38]
+    [at processApply (C
+:\Users\mahi\Downloads\
+ragfloe-intelligence-ma
+in\ragfloe\frontend\nod
+e_modules\tailwindcss\l
+ib\lib\expandApplyAtRul
+es.js:380:29)]
+    [at C:\Users\mahi\D
+ownloads\ragfloe-intell
+igence-main\ragfloe\fro
+ntend\node_modules\tail
+windcss\lib\lib\expandA
+pplyAtRules.js:551:9]
+    [at C:\Users\mahi\D
+ownloads\ragfloe-intell
+igence-main\ragfloe\fro
+ntend\node_modules\tail
+windcss\lib\processTail
+windFeatures.js:55:50]
+    [at process.process
+TicksAndRejections (nod
+e:internal/process/task
+_queues:105:5)]
+    [at async plugins (
+C:\Users\mahi\Downloads
+\ragfloe-intelligence-m
+ain\ragfloe\frontend\no
+de_modules\tailwindcss\
+lib\plugin.js:38:17)]
+    at async 
+LazyResult.runAsync (ra
+gfloe-intelligence-main
+/ragfloe/frontend/node_
+modules/postcss/lib/laz
+y-result.js:293:11) [C:
+\Users\mahi\Downloads\r
+agfloe-intelligence-mai
+n\ragfloe\frontend\.nex
+t\build\chunks\ed651_0d
+4a398b._.js:6206:21]
+    at async transform 
+(turbopack:///[turbopac
+k-node]/transforms/post
+css.ts:70:34) [C:\Users
+\mahi\Downloads\ragfloe
+-intelligence-main\ragf
+loe\frontend\.next\buil
+d\chunks\[root-of-the-s
+erver]__c8dba368._.js:1
+72:36]
+    at async run (turbo
+pack:///[turbopack-node
+]/ipc/evaluate.ts:92:23
+) [C:\Users\mahi\Downlo
+ads\ragfloe-intelligenc
+e-main\ragfloe\frontend
+\.next\build\chunks\[ro
+ot-of-the-server]__ab5a
+c2e3._.js:443:31]
+
+Import trace:
+  Browser:
+    ./ragfloe-intellige
+nce-main/ragfloe/fronte
+nd/styles/globals.css
+    ./ragfloe-intellige
+nce-main/ragfloe/fronte
+nd/pages/_app.tsx
+
+
+    at async transform 
+(turbopack:///[turbopac
+k-node]/transforms/post
+css.ts:70:34) [C:\Users
+\mahi\Downloads\ragfloe
+-intelligence-main\ragf
+loe\frontend\.next\buil
+d\chunks\[root-of-the-s
+erver]__c8dba368._.js:1
+72:36])
+    at async run (turbo
+pack:///[turbopack-node
+]/ipc/evaluate.ts:92:23
+) [C:\Users\mahi\Downlo
+ads\ragfloe-intelligenc
+e-main\ragfloe\frontend
+\.next\build\chunks\[ro
+ot-of-the-server]__ab5a
+c2e3._.js:443:31])
