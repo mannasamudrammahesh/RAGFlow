@@ -3,6 +3,7 @@ uvicorn==0.24.0
 python-multipart==0.0.6
 pydantic==2.5.0
 fastembed>=0.2.0
+numpy==1.26.4
 chromadb==0.4.21
 openai>=1.0.0,<2.0.0
 httpx>=0.24.0
