@@ -1,17 +1,30 @@
-from sentence_transformers import SentenceTransformer
-import numpy as np
 from typing import List
+import numpy as np
+
+try:
+    from fastembed import TextEmbedding
+    USE_FASTEMBED = True
+except ImportError:
+    USE_FASTEMBED = False
+    from sentence_transformers import SentenceTransformer
 
 class EmbeddingGenerator:
     def __init__(self, model_name: str = "BAAI/bge-small-en"):
-        self.model = SentenceTransformer(model_name)
+        self.model_name = model_name
+        if USE_FASTEMBED:
+            self.model = TextEmbedding(model_name=model_name)
+        else:
+            self.model = SentenceTransformer(model_name)
     
     def generate(self, texts: List[str]) -> np.ndarray:
         """Generate embeddings for a list of texts"""
-        embeddings = self.model.encode(texts, convert_to_numpy=True)
-        return embeddings
+        if USE_FASTEMBED:
+            return np.array(list(self.model.embed(texts)))
+        return self.model.encode(texts, convert_to_numpy=True)
     
     def generate_single(self, text: str) -> np.ndarray:
         """Generate embedding for a single text"""
+        if USE_FASTEMBED:
+            return np.array(list(self.model.embed([text])))[0]
         embedding = self.model.encode([text], convert_to_numpy=True)
         return embedding[0]
